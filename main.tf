@@ -7,6 +7,7 @@ variable subnet_1_cidr_block {}
 variable avail_zone {}
 variable env_prefix {}
 variable instance_type {}
+variable ssh_key_private {}
 
 
 data "aws_ami" "amazon-linux-image" {
@@ -122,6 +123,16 @@ resource "aws_instance" "myapp-server" {
     Name = "${var.env_prefix}-server"
   }
 
+ 
 
 }
 
+resource "null_resource" "configure_server" {
+  triggers = {
+    trigger = aws_instance.myapp-server.public_ip
+  }
+  provisioner "local-exec" {
+    working_dir = "/Users/andres/Documents/DevOpsBootcamp_TechWorld/proyectos/Ansible_proyectos/ansible_docker" 
+    command     = "ansible-playbook --inventory ${aws_instance.myapp-server.public_ip}, --private-key ${var.ssh_key_private} --user ec2-user deploy-docker.yaml"
+  }
+}
