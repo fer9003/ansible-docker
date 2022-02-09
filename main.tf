@@ -7,8 +7,7 @@ variable subnet_1_cidr_block {}
 variable avail_zone {}
 variable env_prefix {}
 variable instance_type {}
-variable ssh_key {}
-variable my_ip {}
+
 
 data "aws_ami" "amazon-linux-image" {
   most_recent = true
@@ -53,7 +52,7 @@ resource "aws_security_group" "myapp-sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = [var.my_ip]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
@@ -105,10 +104,6 @@ resource "aws_route_table_association" "a-rtb-subnet" {
   route_table_id = aws_route_table.myapp-route-table.id
 }
 
-resource "aws_key_pair" "ssh-key" {
-  key_name   = "myapp-key"
-  public_key = file(var.ssh_key)
-}
 
 output "server-ip" {
     value = aws_instance.myapp-server.public_ip
@@ -117,7 +112,7 @@ output "server-ip" {
 resource "aws_instance" "myapp-server" {
   ami                         = data.aws_ami.amazon-linux-image.id
   instance_type               = var.instance_type
-  key_name                    = "myapp-key"
+  key_name                    = "IMAC-devops"
   associate_public_ip_address = true
   subnet_id                   = aws_subnet.myapp-subnet-1.id
   vpc_security_group_ids      = [aws_security_group.myapp-sg.id]
